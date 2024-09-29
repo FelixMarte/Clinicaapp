@@ -1,6 +1,6 @@
 namespace Clinicaapp.Domain.Entities.Configuration
 {
-    internal class Paciente
+    public class Paciente
     {
         public string Nombre { get; set; }
         public string Apellido { get; set; }
