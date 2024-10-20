@@ -6,6 +6,7 @@ using Clinicaapp.Persistence.Base;
 using Clinicaapp.Persistence.Context;
 using Clinicaapp.Persistence.Exceptions;
 using Clinicaapp.Persistence.Interfaces.Configuracion;
+using Clinicaapp.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -87,7 +88,7 @@ namespace Clinicaapp.Persistence.Repositories
             catch (DoctorValidationException ex)
             {
                 result.Succes = false;
-                result.Message = ex.Message; // Usar el mensaje de la excepción
+                result.Message = ex.Message; 
             }
             catch (Exception ex)
             {
@@ -102,12 +103,25 @@ namespace Clinicaapp.Persistence.Repositories
             OperationResult result = new OperationResult();
             try
             {
-                // Obtener todos los doctores de la base de datos
-                var doctors = await context.Doctors.ToListAsync();
+                var doctors = await (from doctor in context.Doctors
+                                     orderby doctor.CreatedAt descending
+                                     select new DoctorsModel()
+                                     {
+                                         DoctorID = doctor.DoctorID,
+                                         FirstName = doctor.FirstName,
+                                         LastName = doctor.LastName,
+                                         Specialty = doctor.Specialty,
+                                         LicenseNumber = doctor.LicenseNumber,
+                                         PhoneNumber = doctor.PhoneNumber,
+                                         YearsOfExperience = doctor.YearsOfExperience,
+                                         Education = doctor.Education,
+                                         Bio = doctor.Bio,
+                                         ConsultationFee = doctor.ConsultationFee,
+                                         ClinicAddress = doctor.ClinicAddress,
+                                         LicenseExpirationDate = doctor.LicenseExpirationDate,
+                                     }).ToListAsync();
 
-                int doctorCount = await context.Doctors.CountAsync();
-
-                if (doctorCount == 0)
+                if (doctors == null || !doctors.Any())
                 {
                     result.Succes = false;
                     result.Message = "No se encontraron doctores en la base de datos.";
@@ -116,18 +130,65 @@ namespace Clinicaapp.Persistence.Repositories
                 {
                     result.Succes = true;
                     result.Message = "Doctores encontrados exitosamente.";
-                    result.Data = doctors; // Puedes ajustar el formato de los datos según tus necesidades
+                    result.Data = doctors;
                 }
             }
             catch (Exception ex)
             {
                 result.Succes = false;
                 result.Message = $"Error al obtener los doctores: {ex.Message}";
-                logger.LogError(ex, "Error al obtener todos los doctores.");
+                logger.LogError(result.Message, ex.ToString());
             }
 
             return result;
         }
+
+        public async override Task<OperationResult> GetEntityBy(int Id)
+        {
+            OperationResult operationResult = new OperationResult();
+
+            try
+            {
+                operationResult.Data = await(from doctor in context.Doctors
+                                             where doctor.DoctorID == Id
+                                             select new DoctorsModel()
+                                             {
+                                                 DoctorID = doctor.DoctorID,
+                                                 FirstName = doctor.FirstName,
+                                                 LastName = doctor.LastName,
+                                                 Specialty = doctor.Specialty,
+                                                 LicenseNumber = doctor.LicenseNumber,
+                                                 PhoneNumber = doctor.PhoneNumber,
+                                                 YearsOfExperience = doctor.YearsOfExperience,
+                                                 Education = doctor.Education,
+                                                 Bio = doctor.Bio,
+                                                 ConsultationFee = doctor.ConsultationFee,
+                                                 ClinicAddress = doctor.ClinicAddress,
+                                                 LicenseExpirationDate = doctor.LicenseExpirationDate,
+
+                                             }).FirstOrDefaultAsync();
+
+                if (operationResult.Data == null)
+                {
+                    operationResult.Succes = false;
+                    operationResult.Message = "No se encontró el doctor con el ID proporcionado.";
+                }
+                else
+                {
+                    operationResult.Succes = true;
+                    operationResult.Message = "Doctor encontrado exitosamente.";
+                }
+            }
+            catch (Exception ex)
+            {
+                operationResult.Succes = false;
+                operationResult.Message = "Error obteniendo el doctor.";
+                logger.LogError(operationResult.Message, ex.ToString());
+            }
+
+            return operationResult;
+        }
+
         private void ValidateDoctor(Doctors entity)
         {
             if (string.IsNullOrWhiteSpace(entity.FirstName) || string.IsNullOrWhiteSpace(entity.LastName))
@@ -172,22 +233,10 @@ namespace Clinicaapp.Persistence.Repositories
         }
 
 
-        public List<OperationResult> DeleteDoctorsByDoctorId(int DoctorID)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public List<OperationResult> GetDoctorsByDoctorId(int DoctorID)
-        {
-            throw new NotImplementedException();
-        }
 
-        public List<OperationResult> SaveDoctorsByDoctorId(int DoctorID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<OperationResult> UpdateDoctorsByDoctorId(int DoctorID)
         {
             throw new NotImplementedException();
         }
