@@ -20,4 +20,3 @@ namespace Clinicaapp.Domain.Base
         }
     }
 }
-[][]
