@@ -9,7 +9,7 @@ namespace Clinicaapp.Persistence.Interfaces.Configuracion
     public interface IDoctorsRepository : IBaseRepository<Doctors>
     {
 
-        List<OperationResult> GetDoctorsByDoctorId(int DoctorID);
+      
     
     }
 }
