@@ -5,7 +5,7 @@ namespace Clinicaapp.Persistence.Interfaces.Configuracion
 {
     public interface IPatientsRepository
     {
-        List<OperationResult> GetPatientByPatientID(int PatientID);
+      
 
     }
 }
