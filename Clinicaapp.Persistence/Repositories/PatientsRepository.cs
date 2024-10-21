@@ -255,10 +255,7 @@ namespace Clinicaapp.Persistence.Repositories
             var validBloodTypes = new List<string> { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" };
             return validBloodTypes.Contains(bloodType);
         }
-        public List<OperationResult> GetPatientByPatientID(int PatientID)
-        {
-            throw new NotImplementedException();
-        }
+       
 
        
     }
