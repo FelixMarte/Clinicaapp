@@ -1,10 +1,7 @@
-﻿using Clinicaapp.Domain.Result;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Clinicaapp.Domain.Entities.Configuration;
+using Clinicaapp.Domain.Result;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Clinicaapp.Domain.Repositories
 {
@@ -14,7 +11,9 @@ namespace Clinicaapp.Domain.Repositories
         Task<OperationResult> Update(TEntity entity);
         Task<OperationResult> Remove(TEntity entity);
         Task<OperationResult> GetAll();
+        Task<OperationResult> GetAll(Expression<Func<TEntity, bool>> filter);
         Task<OperationResult> GetEntityBy(int Id);
-        Task<OperationResult> Exists(Expression <Func<TEntity, bool>> filter);
+        Task<bool> Exists(Expression<Func<TEntity, bool>> filter);
+
     }
 }
