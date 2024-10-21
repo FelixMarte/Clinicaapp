@@ -9,7 +9,6 @@ namespace Clinicaapp.Persistence.Context
         public ClinicaContext(DbContextOptions<ClinicaContext> options) : base(options) { }
 
         #region"Configuracion de las entidades"
-        public DbSet<Users> Users { get; set; } 
         public DbSet<Doctors> Doctors { get; set; }
         public DbSet<Patients> Patients { get; set; }
         #endregion
