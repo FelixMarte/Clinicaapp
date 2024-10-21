@@ -235,11 +235,7 @@ namespace Clinicaapp.Persistence.Repositories
 
 
 
-        public List<OperationResult> GetDoctorsByDoctorId(int DoctorID)
-
-        {
-            throw new NotImplementedException();
-        }
+        
     }
       
 }
