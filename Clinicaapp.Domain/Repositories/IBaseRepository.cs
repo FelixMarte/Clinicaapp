@@ -7,7 +7,7 @@ namespace Clinicaapp.Domain.Repositories
     {
         Task<OperationResult> Save(TEntity entity);
         Task<OperationResult> Update(TEntity entity);
-        Task<OperationResult> Delete(TEntity entity);
+        Task<OperationResult> Delete(int Id);
         Task<OperationResult> GetAll();
         Task<OperationResult> GetEntityBy(int Id);
         Task<OperationResult> Exists(Expression <Func<TEntity, bool>> filter);

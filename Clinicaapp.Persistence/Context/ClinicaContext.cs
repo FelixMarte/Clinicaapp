@@ -13,6 +13,6 @@ namespace Clinicaapp.Persistence.Context
         public DbSet<Patients> Patients { get; set; }
         #endregion
 
-
+    
     }
 }

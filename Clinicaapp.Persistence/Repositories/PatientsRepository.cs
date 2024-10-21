@@ -30,7 +30,8 @@ namespace Clinicaapp.Persistence.Repositories
             OperationResult result = new OperationResult();
             try
             {
-             
+
+
                 var existingPatient = await context.Patients
                     .FirstOrDefaultAsync(p => p.PatientID == entity.PatientID);
 
@@ -41,10 +42,10 @@ namespace Clinicaapp.Persistence.Repositories
                     return result;
                 }
 
-            
+
                 ValidatePatient(entity);
 
-          
+
                 await context.Patients.AddAsync(entity);
                 await context.SaveChangesAsync();
 
@@ -55,12 +56,12 @@ namespace Clinicaapp.Persistence.Repositories
             catch (PatientValidationException ex)
             {
                 result.Succes = false;
-                result.Message = ex.Message; 
+                result.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 result.Succes = false;
-                result.Message = $"Error al guardar el paciente: {ex.Message}";
+                result.Message = $"Error al guardar el paciente: {ex.Message}. Detalle: {ex.InnerException?.Message}";
                 logger.LogError(ex, "Error al guardar el paciente.");
             }
             return result;
@@ -70,10 +71,10 @@ namespace Clinicaapp.Persistence.Repositories
             OperationResult result = new OperationResult();
             try
             {
-                // Validar la entidad antes de la actualización
+
                 ValidatePatient(entity);
 
-                // Buscar el paciente existente por el ID
+
                 var existingPatient = await context.Patients
                     .FirstOrDefaultAsync(p => p.PatientID == entity.PatientID);
 
@@ -84,9 +85,8 @@ namespace Clinicaapp.Persistence.Repositories
                     return result;
                 }
 
-                
-                existingPatient.FirstName = entity.FirstName;
-                existingPatient.LastName = entity.LastName;
+
+
                 existingPatient.DateOfBirth = entity.DateOfBirth;
                 existingPatient.Address = entity.Address;
                 existingPatient.EmergencyContactName = entity.EmergencyContactName;
@@ -94,25 +94,25 @@ namespace Clinicaapp.Persistence.Repositories
                 existingPatient.BloodType = entity.BloodType;
                 existingPatient.Allergies = entity.Allergies;
                 existingPatient.PhoneNumber = entity.PhoneNumber;
-               
 
-              
+
+
                 context.Patients.Update(existingPatient);
                 await context.SaveChangesAsync();
 
                 result.Succes = true;
                 result.Message = "Paciente actualizado exitosamente.";
-                result.Data = existingPatient; 
+                result.Data = existingPatient;
             }
             catch (PatientValidationException ex)
             {
                 result.Succes = false;
-                result.Message = ex.Message; 
+                result.Message = ex.Message;
             }
             catch (Exception ex)
             {
                 result.Succes = false;
-                result.Message = $"Error al actualizar el paciente: {ex.Message}";
+                result.Message = $"Error al actualizar el paciente: {ex.Message}. Detalle: {ex.InnerException?.Message}";
                 logger.LogError(ex, "Error al actualizar el paciente.");
             }
             return result;
@@ -122,21 +122,20 @@ namespace Clinicaapp.Persistence.Repositories
             OperationResult result = new OperationResult();
             try
             {
-                var patients = await(from patient in context.Patients
-                                     orderby patient.PatientID descending 
-                                     select new PatientsModel() 
-                                     {
-                                         PatientID = patient.PatientID,
-                                         FirstName = patient.FirstName,
-                                         LastName = patient.LastName,
-                                         DateOfBirth = patient.DateOfBirth,
-                                         Address = patient.Address,
-                                         EmergencyContactName = patient.EmergencyContactName,
-                                         EmergencyContactPhone = patient.EmergencyContactPhone,
-                                         BloodType = patient.BloodType,
-                                         Allergies = patient.Allergies,
-                                         PhoneNumber = patient.PhoneNumber,
-                                     }).ToListAsync();
+                var patients = await (from patient in context.Patients
+                                      orderby patient.PatientID descending
+                                      select new PatientsModel()
+                                      {
+                                          PatientID = patient.PatientID,
+                                          Gender = patient.Gender,
+                                          DateOfBirth = patient.DateOfBirth,
+                                          Address = patient.Address,
+                                          EmergencyContactName = patient.EmergencyContactName,
+                                          EmergencyContactPhone = patient.EmergencyContactPhone,
+                                          BloodType = patient.BloodType,
+                                          Allergies = patient.Allergies,
+                                          PhoneNumber = patient.PhoneNumber,
+                                      }).ToListAsync();
 
                 if (patients == null || !patients.Any())
                 {
@@ -154,7 +153,7 @@ namespace Clinicaapp.Persistence.Repositories
             {
                 result.Succes = false;
                 result.Message = $"Error al obtener los pacientes: {ex.Message}";
-                logger.LogError(result.Message, ex.ToString());
+                logger.LogError(result.Message, ex);
             }
 
             return result;
@@ -167,11 +166,10 @@ namespace Clinicaapp.Persistence.Repositories
             {
                 operationResult.Data = await (from patient in context.Patients
                                               where patient.PatientID == Id
-                                              select new PatientsModel() 
+                                              select new PatientsModel()
                                               {
                                                   PatientID = patient.PatientID,
-                                                  FirstName = patient.FirstName,
-                                                  LastName = patient.LastName,
+                                                  Gender = patient.Gender,
                                                   DateOfBirth = patient.DateOfBirth,
                                                   Address = patient.Address,
                                                   EmergencyContactName = patient.EmergencyContactName,
@@ -196,7 +194,7 @@ namespace Clinicaapp.Persistence.Repositories
             {
                 operationResult.Succes = false;
                 operationResult.Message = "Error obteniendo el paciente.";
-                logger.LogError(operationResult.Message, ex.ToString());
+                logger.LogError(operationResult.Message, ex);
             }
 
             return operationResult;
@@ -205,25 +203,17 @@ namespace Clinicaapp.Persistence.Repositories
        
         private void ValidatePatient(Patients entity)
         {
-         
-            if (string.IsNullOrWhiteSpace(entity.FirstName) || string.IsNullOrWhiteSpace(entity.LastName))
-            {
-                throw new PatientValidationException("El nombre y el apellido son obligatorios.");
-            }
 
-           
             if (entity.DateOfBirth > DateTime.Now)
             {
                 throw new PatientValidationException("La fecha de nacimiento no puede ser una fecha futura.");
             }
 
-         
             if (!string.IsNullOrWhiteSpace(entity.Address) && entity.Address.Length > 255)
             {
                 throw new PatientValidationException("La dirección no puede exceder los 255 caracteres.");
             }
 
-         
             if (!string.IsNullOrWhiteSpace(entity.EmergencyContactPhone) && entity.EmergencyContactPhone.Length > 15)
             {
                 throw new PatientValidationException("El número de teléfono de contacto de emergencia no puede exceder los 15 caracteres.");
@@ -234,19 +224,16 @@ namespace Clinicaapp.Persistence.Repositories
                 throw new PatientValidationException("El número de teléfono del paciente no puede exceder los 15 caracteres.");
             }
 
-            
             if (!string.IsNullOrWhiteSpace(entity.EmergencyContactPhone) && string.IsNullOrWhiteSpace(entity.EmergencyContactName))
             {
                 throw new PatientValidationException("El nombre del contacto de emergencia es obligatorio si se proporciona un número de teléfono de emergencia.");
             }
 
-            
             if (!string.IsNullOrWhiteSpace(entity.BloodType) && !IsValidBloodType(entity.BloodType))
             {
                 throw new PatientValidationException("El tipo de sangre proporcionado no es válido.");
             }
 
-            
             if (!string.IsNullOrWhiteSpace(entity.Allergies) && entity.Allergies.Length > 500)
             {
                 throw new PatientValidationException("La lista de alergias no puede exceder los 500 caracteres.");

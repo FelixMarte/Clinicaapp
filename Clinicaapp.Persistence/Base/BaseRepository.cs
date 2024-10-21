@@ -17,13 +17,23 @@ namespace Clinicaapp.Persistence.Base
             this.entities = _clinicacontext.Set<TEntity>();   
         }
 
-        public virtual async Task<OperationResult> Delete(TEntity entity)
+        public virtual async Task<OperationResult> Delete(int id)
         {
             OperationResult result = new OperationResult();
             try
             {
-                this.entities.Remove(entity);  
-                await this._clinicacontext.SaveChangesAsync();  
+        
+                var entityToDelete = await entities.FindAsync(id);
+
+                if (entityToDelete == null)
+                {
+                    result.Succes = false;
+                    result.Message = "Entidad no encontrada.";
+                    return result;
+                }
+
+                this.entities.Remove(entityToDelete);
+                await this._clinicacontext.SaveChangesAsync();
 
                 result.Succes = true;
                 result.Message = "Entidad eliminada exitosamente";
@@ -36,6 +46,7 @@ namespace Clinicaapp.Persistence.Base
 
             return result;
         }
+
 
         public virtual async Task<OperationResult> Exists(Expression<Func<TEntity, bool>> filter)
         {

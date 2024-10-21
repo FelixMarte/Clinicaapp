@@ -55,7 +55,7 @@ namespace Clinicaapp.Persistence.Repositories
             catch (Exception ex)
             {
                 result.Succes = false;
-                result.Message = $"Error al guardar el doctor: {ex.Message}";
+                result.Message = $"Error al guardar el doctor: {ex.Message}.detalle{ex.InnerException?.Message} ";
                 logger.LogError(ex, "Error al guardar el doctor.");
             }
 
@@ -66,36 +66,41 @@ namespace Clinicaapp.Persistence.Repositories
             OperationResult result = new OperationResult();
             try
             {
-                ValidateDoctor(entity);
-
-
-                var existingDoctor = await context.Doctors
-                .FirstOrDefaultAsync(d => d.LicenseNumber == entity.LicenseNumber);
-
+                // Obtén el doctor existente
+                var existingDoctor = await context.Doctors.FindAsync(entity.DoctorID); 
                 if (existingDoctor == null)
                 {
                     result.Succes = false;
                     result.Message = "El doctor no existe.";
                     return result;
                 }
-                context.Doctors.Update(entity);
+
+       
+                existingDoctor.YearsOfExperience = entity.YearsOfExperience;
+                existingDoctor.Education = entity.Education;
+                existingDoctor.Bio = entity.Bio;
+                existingDoctor.ConsultationFee = entity.ConsultationFee;
+                existingDoctor.ClinicAddress = entity.ClinicAddress;
+                existingDoctor.LicenseNumber = entity.LicenseNumber;
+                existingDoctor.LicenseExpirationDate = entity.LicenseExpirationDate;
+                existingDoctor.UpdatedAt = DateTime.UtcNow; 
+                existingDoctor.IsActive = entity.IsActive;
+                existingDoctor.PhoneNumber = entity.PhoneNumber;
+
+              
                 await context.SaveChangesAsync();
 
                 result.Succes = true;
                 result.Message = "Doctor actualizado exitosamente.";
-                result.Data = entity;
-            }
-            catch (DoctorValidationException ex)
-            {
-                result.Succes = false;
-                result.Message = ex.Message; 
+                result.Data = existingDoctor; 
             }
             catch (Exception ex)
             {
                 result.Succes = false;
-                result.Message = $"Error al actualizar el doctor: {ex.Message}";
+                result.Message = $"Error al actualizar el doctor: {ex.Message}. Detalle: {ex.InnerException?.Message} ";
                 logger.LogError(ex, "Error al actualizar el doctor.");
             }
+
             return result;
         }
         public async override Task<OperationResult> GetAll()
@@ -108,9 +113,6 @@ namespace Clinicaapp.Persistence.Repositories
                                      select new DoctorsModel()
                                      {
                                          DoctorID = doctor.DoctorID,
-                                         FirstName = doctor.FirstName,
-                                         LastName = doctor.LastName,
-                                         Specialty = doctor.Specialty,
                                          LicenseNumber = doctor.LicenseNumber,
                                          PhoneNumber = doctor.PhoneNumber,
                                          YearsOfExperience = doctor.YearsOfExperience,
@@ -142,7 +144,6 @@ namespace Clinicaapp.Persistence.Repositories
 
             return result;
         }
-
         public async override Task<OperationResult> GetEntityBy(int Id)
         {
             OperationResult operationResult = new OperationResult();
@@ -154,9 +155,6 @@ namespace Clinicaapp.Persistence.Repositories
                                              select new DoctorsModel()
                                              {
                                                  DoctorID = doctor.DoctorID,
-                                                 FirstName = doctor.FirstName,
-                                                 LastName = doctor.LastName,
-                                                 Specialty = doctor.Specialty,
                                                  LicenseNumber = doctor.LicenseNumber,
                                                  PhoneNumber = doctor.PhoneNumber,
                                                  YearsOfExperience = doctor.YearsOfExperience,
@@ -188,22 +186,43 @@ namespace Clinicaapp.Persistence.Repositories
 
             return operationResult;
         }
+        public async override Task<OperationResult> Delete(int id)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var existingDoctor = await context.Doctors
+                    .FirstOrDefaultAsync(d => d.DoctorID == id); 
 
+                if (existingDoctor == null)
+                {
+                    result.Succes = false;
+                    result.Message = "El doctor no existe.";
+                    return result;
+                }
+
+                context.Doctors.Remove(existingDoctor);
+                await context.SaveChangesAsync();
+
+                result.Succes = true;
+                result.Message = "Doctor eliminado exitosamente.";
+                result.Data = existingDoctor;
+            }
+            catch (Exception ex)
+            {
+                result.Succes = false;
+                result.Message = $"Error al eliminar el doctor: {ex.Message}. Detalle: {ex.InnerException?.Message} ";
+                logger.LogError(ex, "Error al eliminar el doctor.");
+            }
+
+            return result;
+        }
         private void ValidateDoctor(Doctors entity)
         {
-            if (string.IsNullOrWhiteSpace(entity.FirstName) || string.IsNullOrWhiteSpace(entity.LastName))
-            {
-                throw new DoctorValidationException("El nombre y el apellido son obligatorios.");
-            }
 
             if (!string.IsNullOrWhiteSpace(entity.ClinicAddress) && entity.ClinicAddress.Length > 255)
             {
                 throw new DoctorValidationException("La dirección de la clínica no puede exceder los 255 caracteres.");
-            }
-
-            if (string.IsNullOrWhiteSpace(entity.Specialty))
-            {
-                throw new DoctorValidationException("La especialidad es obligatoria.");
             }
 
             if (string.IsNullOrWhiteSpace(entity.PhoneNumber) || entity.PhoneNumber.Length > 15)
