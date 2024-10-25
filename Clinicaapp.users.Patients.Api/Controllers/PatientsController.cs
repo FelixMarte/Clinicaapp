@@ -1,24 +1,24 @@
 ﻿using Clinicaapp.Domain.Entities.Configuration;
-using Clinicaapp.Domain.Repositories;
 using Clinicaapp.Persistence.Interfaces.Configuration;
-using Clinicaapp.Persistence.Repositories.Configuracion;
 using Microsoft.AspNetCore.Mvc;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace Clinicaapp.users.Patients.Api.Controllers
+namespace Clinicaapp.users.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PatientController : ControllerBase
+    public class PatientsController : ControllerBase
     {
         private readonly IPatientsRepository _Patientsrepository;
 
-        public PatientController(IPatientsRepository Patientsrepository)
+        public PatientsController(IPatientsRepository Patientsrepository)
         {
             _Patientsrepository = Patientsrepository;
         }
 
+        [HttpGet("GetAllPatients")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _Patientsrepository.GetAll();
@@ -29,7 +29,6 @@ namespace Clinicaapp.users.Patients.Api.Controllers
             }
             return Ok(result);
         }
-
         [HttpGet("GetPatientById/{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -43,9 +42,9 @@ namespace Clinicaapp.users.Patients.Api.Controllers
         }
 
         [HttpPost("SavePatient")]
-        public async Task<IActionResult> Post([FromBody] Patients patients)
+        public async Task<IActionResult> Post([FromBody] Patient patient)
         {
-            var result = await _Patientsrepository.Save(patients);
+            var result = await _Patientsrepository.Save(patient);
 
             if (!result.Success)
             {
@@ -54,16 +53,33 @@ namespace Clinicaapp.users.Patients.Api.Controllers
             return Ok(result);
         }
 
-        // PUT api/<PatientController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("UpdatePatient")]
+        public async Task<IActionResult> Put([FromBody] Patient patient)
         {
+            var result = await _Patientsrepository.Update(patient);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
 
-        // DELETE api/<PatientController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("DeletePatient/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
+            var patient = await _Patientsrepository.GetEntityBy(id);
+            if (patient.Data == null)
+            {
+                return NotFound(new { Success = false, Message = "Patient not found." });
+            }
+
+            var result = await _Patientsrepository.Remove(patient.Data);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
     }
 }

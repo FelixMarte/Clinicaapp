@@ -1,15 +1,11 @@
 ﻿using BoletosApp.Persistance.Context;
-using Clinicaapp.Domain.Base;
 using Clinicaapp.Domain.Entities.Configuration;
-using Clinicaapp.Domain.Repositories;
 using Clinicaapp.Domain.Result;
 using Clinicaapp.Persistance.Base;
-using Clinicaapp.Persistance.Repositories;
 using Clinicaapp.Persistence.Interfaces.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Linq.Expressions;
+
 
 
 
@@ -20,8 +16,7 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                   ILogger<PatientsRepository> logger) : BaseRepository<Patients>(clinicaContext), IPatientsRepository
     {
         private readonly ClinicaContext _clinicaContext;
-        private readonly ILogger<PatientsRepository> _logger;
-
+        private readonly ILogger<PatientsRepository> _logger = logger;
 
         private OperationResult ValidateEntity(Patients entity, bool checkId = false)
         {

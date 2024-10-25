@@ -1,11 +1,15 @@
 ﻿
 
 using Clinicaapp.Domain.Base;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Clinicaapp.Domain.Entities.Configuration
 {
+    [Table("Patients")]
     public class Patients : BaseEntity
     {
+        [Key]
         public int PatientID { get; set; }
         public DateTime DateOfBirth { get; set; }
         public char Gender { get; set; }
