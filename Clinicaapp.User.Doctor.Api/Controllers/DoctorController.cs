@@ -72,7 +72,7 @@ namespace Clinicaapp.Users.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult>  Delete(int id)
         {
-            var result = await _doctorsRepository.Delete(id); // Llama al método con el id
+            var result = await _doctorsRepository.Delete(id); 
             if (!result.Succes)
             {
                 return BadRequest(result);
