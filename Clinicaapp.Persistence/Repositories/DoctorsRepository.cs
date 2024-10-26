@@ -217,6 +217,7 @@ namespace Clinicaapp.Persistence.Repositories
 
             return result;
         }
+        
         private void ValidateDoctor(Doctors entity)
         {
 
