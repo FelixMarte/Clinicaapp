@@ -201,6 +201,39 @@ namespace Clinicaapp.Persistence.Repositories
 
             return operationResult;
         }
+        
+          public async override Task<OperationResult> Delete(int id)
+          {
+              OperationResult result = new OperationResult();
+              try
+              {
+                  var existingpatient = await context.Patients
+                      .FirstOrDefaultAsync(p => p.PatientID  == id);
+        
+                  if (existingpatient == null)
+                  {
+                      result.Succes = false;
+                      result.Message = "El paciente no existe.";
+                      return result;
+                  }
+        
+                  context.Patients .Remove(existingpatient);
+                  await context.SaveChangesAsync();
+        
+                  result.Succes = true;
+                  result.Message = "paciente eliminado exitosamente.";
+                  result.Data = existingpatient;
+              }
+              catch (Exception ex)
+              {
+                  result.Succes = false;
+                  result.Message = $"Error al eliminar el pasiente: {ex.Message}. Detalle: {ex.InnerException?.Message} ";
+                  logger.LogError(ex, "Error al eliminar el doctor.");
+              }
+        
+              return result;
+          }
+          
         private void ValidatePatient(Patients entity)
         {
          
