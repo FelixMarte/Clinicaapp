@@ -15,8 +15,5 @@ namespace Clinicaapp.Domain.Base
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public DateTime FechaCreacion { get; set; }
-        public DateTime? FechaModificacion { get; set; }
-        public int? UsuarioModificacion { get; set; }
     }
 }

@@ -78,24 +78,36 @@ namespace Clinicaapp.Persistance.Base
             return result;
         }
 
-        public async virtual Task<OperationResult> Remove(TEntity entity)
+        public async virtual Task<OperationResult> Remove(int Id)
         {
             OperationResult result = new OperationResult();
 
             try
             {
-                entities.Remove(entity);
-                await _Clinicacontext.SaveChangesAsync();
+
+                var entity = await entities.FindAsync(Id);
+
+                if (entity != null)
+                {
+                    entities.Remove(entity);
+                    await _Clinicacontext.SaveChangesAsync();
+                    result.Success = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    result.Message = "Entidad no encontrada.";
+                }
             }
             catch (Exception ex)
             {
                 result.Success = false;
-                result.Message = $"Ocurrió un error {ex.Message} removiendo la entidad.";
-
+                result.Message = $"Ocurrió un error {ex.Message} .detalle{ex.InnerException?.Message} ";
             }
 
             return result;
         }
+
 
         public async virtual Task<OperationResult> Save(TEntity entity)
         {

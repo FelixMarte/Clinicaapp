@@ -6,11 +6,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Clinicaapp.Domain.Entities.Configuration
 {
-    [Table("Patients")]
+    [Table("Patients", Schema = "users")]
     public class Patients : BaseEntity
     {
-        [Key]
-        public int PatientID { get; set; }
+        [Key] public int PatientID { get; set; }
         public DateTime DateOfBirth { get; set; }
         public char Gender { get; set; }
         public string? PhoneNumber { get; set; }
@@ -19,11 +18,7 @@ namespace Clinicaapp.Domain.Entities.Configuration
         public string? EmergencyContactPhone { get; set; }
         public string? BloodType { get; set; }
         public string? Allergies { get; set; }
-        public int InsuranceProviderID { get; set; }
-        public new DateTime CreatedAt { get; set; }
-        public new DateTime? UpdatedAt { get; set; }
-        public new bool IsActive { get; set; }
-
+        public bool IsActive { get; set; } = true;
         public Patients()
         {
             CreatedAt = DateTime.UtcNow;

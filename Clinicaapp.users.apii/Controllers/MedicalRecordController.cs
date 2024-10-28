@@ -1,5 +1,6 @@
 ﻿using Clinicaapp.Domain.Entities.Configuration;
 using Clinicaapp.Persistence.Interfaces.Configuration;
+using Clinicaapp.Persistence.Repositories.Configuracion;
 using Clinicaapp.users.apii.ProvidEntities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,16 +17,31 @@ namespace Clinicaapp.users.apii.Controllers
             _medicalRecordRepository = medicalRecordRepository;
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<MedicalRecor> GetById(int id)
+        [HttpGet("GetAllMedicalRecords")]
+        public async Task<IActionResult> GetAll()
         {
-            var record = _medicalRecordRepository.GetEntityBy(id);
-            if (record == null)
+            var result = await _medicalRecordRepository.GetAll();
+
+            if (!result.Success)
             {
-                return NotFound();
+                return BadRequest(result);
             }
-            return Ok(record);
+            return Ok(result);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _medicalRecordRepository.GetEntityBy(id);
+
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
+
+            return Ok(result.Data);
+        }
+
 
         [HttpPost]
         public async Task<ActionResult<MedicalRecord>> Create([FromBody] MedicalRecord record)
@@ -70,9 +86,6 @@ namespace Clinicaapp.users.apii.Controllers
                 return NotFound("El registro médico no se encontró.");
             }
 
-            // Actualiza los campos
-            existingRecord.PatientID = updatedRecord.PatientID;
-            existingRecord.DoctorID = updatedRecord.DoctorID;
             existingRecord.Diagnosis = updatedRecord.Diagnosis;
             existingRecord.Treatment = updatedRecord.Treatment;
             existingRecord.DateOfVisit = updatedRecord.DateOfVisit;
@@ -83,22 +96,19 @@ namespace Clinicaapp.users.apii.Controllers
 
             return NoContent();
         }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int PatientId)
+        
+        [HttpDelete("Delete")]
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = await _medicalRecordRepository.GetEntityBy(PatientId);
-            if (result == null || !result.Success)
+            var result = await _medicalRecordRepository.Remove(id);
+            if (!result.Success)
             {
-                return NotFound();
+                return BadRequest(result);
+
             }
-
-            var record = result.Entity;
-            _ = _medicalRecordRepository.Remove(record);
-
-            return NoContent();
+            return Ok(result);
         }
-
+       
 
     }
 }

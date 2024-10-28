@@ -31,11 +31,13 @@ namespace Clinicaapp.Persistance.Repositories
                 await _clinicaContext.MedicalRecords.AddAsync(entity);
                 await _clinicaContext.SaveChangesAsync();
                 operationResult.Data = entity;
+                operationResult.Success = true;
+                operationResult.Message = "Historial médico guardado exitosamente.";
             }
             catch (Exception ex)
             {
                 operationResult.Success = false;
-                operationResult.Message = "Error guardando el historial médico.";
+                operationResult.Message = $"Error al guardar el historial médico: {ex.Message}. Detalle: {ex.InnerException?.Message}";
                 logger.LogError(operationResult.Message, ex.ToString());
             }
 
@@ -78,6 +80,8 @@ namespace Clinicaapp.Persistance.Repositories
                 _clinicaContext.MedicalRecords.Update(recordToUpdate);
                 await _clinicaContext.SaveChangesAsync();
                 operationResult.Data = recordToUpdate;
+                operationResult.Success = true;
+                operationResult.Message = "Historial médico actualizado exitosamente.";
             }
             catch (Exception ex)
             {
@@ -108,6 +112,8 @@ namespace Clinicaapp.Persistance.Repositories
                     _clinicaContext.MedicalRecords.Remove(recordToRemove);
                     await _clinicaContext.SaveChangesAsync();
                     operationResult.Data = recordToRemove;
+                    operationResult.Success = true;
+                    operationResult.Message = "Historial médico eliminado exitosamente.";
                 }
                 else
                 {
@@ -132,6 +138,8 @@ namespace Clinicaapp.Persistance.Repositories
             try
             {
                 operationResult.Data = await _clinicaContext.MedicalRecords.ToListAsync();
+                operationResult.Success = true;
+                operationResult.Message = "Historiales médicos obtenidos exitosamente.";
             }
             catch (Exception ex)
             {
@@ -156,23 +164,39 @@ namespace Clinicaapp.Persistance.Repositories
 
             try
             {
-                operationResult.Data = await _clinicaContext.MedicalRecords.FirstOrDefaultAsync(m => m.RecordID == recordID);
+                operationResult.Data = await _clinicaContext.MedicalRecords
+                    .Where(m => m.RecordID == recordID)
+                    .Select(m => new
+                    {
+                        m.RecordID,
+                        m.Diagnosis,
+                        m.Treatment,
+                        m.DateOfVisit,
+                        m.CreatedAt,
+                        m.UpdatedAt
+                    })
+                    .FirstOrDefaultAsync();
+
                 if (operationResult.Data == null)
                 {
                     operationResult.Success = false;
                     operationResult.Message = "Historial médico no encontrado.";
+                }
+                else
+                {
+                    operationResult.Success = true;
+                    operationResult.Message = "Historial médico encontrado exitosamente.";
                 }
             }
             catch (Exception ex)
             {
                 operationResult.Success = false;
                 operationResult.Message = "Error obteniendo el historial médico.";
-                logger.LogError(operationResult.Message, ex.ToString());
+                logger.LogError($"{operationResult.Message} - Detalles del error: {ex.Message}", ex);
             }
 
             return operationResult;
         }
-
     }
 }
-    
+

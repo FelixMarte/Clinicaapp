@@ -1,12 +1,7 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
-
-namespace Clinicaapp.Domain.Entities.Configuration
+﻿namespace Clinicaapp.Domain.Entities.Configuration
 {
     public class PatientsModel
     {
-        [Key]
         public int PatientID { get; set; }
         public DateTime DateOfBirth { get; set; }
         public char Gender { get; set; }
@@ -16,10 +11,9 @@ namespace Clinicaapp.Domain.Entities.Configuration
         public string? EmergencyContactPhone { get; set; }
         public string? BloodType { get; set; }
         public string? Allergies { get; set; }
-        public int InsuranceProviderID { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public bool IsActive { get; set; }
+        public new DateTime CreatedAt { get; set; }
+        public new DateTime? UpdatedAt { get; set; }
+        public new bool IsActive { get; set; }
 
 
     }

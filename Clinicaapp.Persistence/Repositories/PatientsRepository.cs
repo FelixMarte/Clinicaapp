@@ -6,17 +6,16 @@ using Clinicaapp.Persistence.Interfaces.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-
-
-
 namespace Clinicaapp.Persistence.Repositories.Configuracion
 
 {
     public class PatientsRepository(ClinicaContext clinicaContext,
                   ILogger<PatientsRepository> logger) : BaseRepository<Patients>(clinicaContext), IPatientsRepository
     {
-        private readonly ClinicaContext _clinicaContext;
-        private readonly ILogger<PatientsRepository> _logger = logger;
+        private readonly ClinicaContext _clinicaContext = clinicaContext ?? throw new ArgumentNullException(nameof(clinicaContext));
+        private readonly ILogger<PatientsRepository> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+
 
         private OperationResult ValidateEntity(Patients entity, bool checkId = false)
         {
@@ -55,8 +54,7 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
             patientToUpdate.Gender = entity.Gender;
             patientToUpdate.BloodType = entity.BloodType;
             patientToUpdate.Allergies = entity.Allergies;
-            patientToUpdate.InsuranceProviderID = entity.InsuranceProviderID;
-            patientToUpdate.UpdateTimestamp(); 
+            patientToUpdate.UpdateTimestamp();
         }
         public async override Task<OperationResult> Save(Patients entity)
         {
@@ -66,19 +64,27 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
 
             try
             {
-                return await base.Save(entity);
+                var saveResult = await base.Save(entity);
+
+                if (saveResult.Success)
+                {
+                    saveResult.Message = "Paciente guardado exitosamente.";
+                    saveResult.Data = entity;
+                }
+
+                return saveResult;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error guardando el Paciente.", ex);
+                _logger.LogError($"Error guardando el Paciente con ID {entity.PatientID}.", ex);
                 return new OperationResult
                 {
                     Success = false,
                     Message = "Error guardando el Paciente."
                 };
-
             }
         }
+
         public async override Task<OperationResult> Update(Patients entity)
         {
             var validation = ValidateEntity(entity, true);
@@ -95,10 +101,16 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                         Message = "Paciente no encontrado."
                     };
 
-                // Actualizar los datos del paciente
                 UpdatePatientFields(patientToUpdate, entity);
+                var updateResult = await base.Update(patientToUpdate);
 
-                return await base.Update(patientToUpdate);
+                if (updateResult.Success)
+                {
+                    updateResult.Message = "Paciente actualizado exitosamente.";
+                    updateResult.Data = patientToUpdate;
+                }
+
+                return updateResult;
             }
             catch (Exception ex)
             {
@@ -110,29 +122,32 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 };
             }
         }
-        public async override Task<OperationResult> Remove(Patients entity)
+        public async Task<OperationResult> Remove(int id)
         {
-            var validation = ValidateEntity(entity, true);
-            if (!validation.Success)
-                return validation;
-
             try
             {
-                var patientToRemove = await _clinicaContext.Patients.FindAsync(entity.PatientID);
+                var patientToRemove = await _clinicaContext.Patients.FindAsync(id);
+
                 if (patientToRemove != null)
                 {
                     patientToRemove.IsActive = false;
                     patientToRemove.UpdateTimestamp();
-                    return await base.Update(patientToRemove);
-                }
-                else
-                {
+                    _clinicaContext.Patients.Update(patientToRemove);
+                    await _clinicaContext.SaveChangesAsync();
+
                     return new OperationResult
                     {
-                        Success = false,
-                        Message = "Paciente no encontrado."
+                        Success = true,
+                        Message = "Paciente marcado como inactivo.",
+                        Data = patientToRemove
                     };
                 }
+
+                return new OperationResult
+                {
+                    Success = false,
+                    Message = "Paciente no encontrado."
+                };
             }
             catch (Exception ex)
             {
@@ -144,7 +159,8 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 };
             }
         }
-        public async override Task<OperationResult> GetAll()
+
+        public async Task<OperationResult> GetAll()
         {
             try
             {
@@ -152,6 +168,7 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 return new OperationResult
                 {
                     Success = true,
+                    Message = "Pacientes obtenidos exitosamente.",
                     Data = patients
                 };
             }
@@ -165,7 +182,8 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 };
             }
         }
-        public async override Task<OperationResult> GetEntityBy(int id)
+
+        public async Task<OperationResult> GetEntityBy(int id)
         {
             try
             {
@@ -183,6 +201,7 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 return new OperationResult
                 {
                     Success = true,
+                    Message = "Paciente obtenido exitosamente.",
                     Data = patient
                 };
             }
