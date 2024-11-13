@@ -13,11 +13,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinicaapp.Infraestructure"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinicaapp.Persistence", "Clinicaapp.Persistence\Clinicaapp.Persistence.csproj", "{DEF56B5C-FA3A-4834-83C2-E2834E1F0819}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinicaapp.web", "Clinicaapp.web\Clinicaapp.web.csproj", "{C711527D-F7B0-4FFF-B57E-B2062E095727}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinicaapp.web", "Clinicaapp.web\Clinicaapp.web.csproj", "{C711527D-F7B0-4FFF-B57E-B2062E095727}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apii", "Apii", "{081C2567-B02B-496E-837C-9B0F3A38BDFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinicaapp.users.apii", "Clinicaapp.users.apii\Clinicaapp.users.apii.csproj", "{7BBB3307-27F1-44B7-9627-445A264178C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinicaapp.users.apii", "Clinicaapp.users.apii\Clinicaapp.users.apii.csproj", "{7BBB3307-27F1-44B7-9627-445A264178C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinicaapp.Application", "Clinicaapp.Application\Clinicaapp.Application.csproj", "{A060D713-E386-445E-9DC3-D15F2075B67B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{7BBB3307-27F1-44B7-9627-445A264178C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BBB3307-27F1-44B7-9627-445A264178C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BBB3307-27F1-44B7-9627-445A264178C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A060D713-E386-445E-9DC3-D15F2075B67B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A060D713-E386-445E-9DC3-D15F2075B67B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A060D713-E386-445E-9DC3-D15F2075B67B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A060D713-E386-445E-9DC3-D15F2075B67B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{DEF56B5C-FA3A-4834-83C2-E2834E1F0819} = {39B003E0-83CC-4435-96FF-87DF0622E617}
 		{C711527D-F7B0-4FFF-B57E-B2062E095727} = {76AF39F6-EBBC-4711-A74B-478AC261BE3D}
 		{7BBB3307-27F1-44B7-9627-445A264178C8} = {081C2567-B02B-496E-837C-9B0F3A38BDFB}
+		{A060D713-E386-445E-9DC3-D15F2075B67B} = {39B003E0-83CC-4435-96FF-87DF0622E617}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {90A7D71F-D618-48D2-BF6E-A78549EC3AA8}
