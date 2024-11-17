@@ -1,202 +1,146 @@
 ﻿using BoletosApp.Persistance.Context;
 using Clinicaapp.Domain.Entities.Configuration;
 using Clinicaapp.Domain.Result;
-using Clinicaapp.Persistance.Base;
 using Clinicaapp.Persistence.Interfaces.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
-
-
-namespace Clinicaapp.Persistance.Repositories
+namespace Clinicaapp.Persistence.Repositories.Configuration
 {
-    public class MedicalRecordRepository(ClinicaContext clinicaContext, ILogger<MedicalRecordRepository> logger) : BaseRepository<MedicalRecord>(clinicaContext), IMedicalRecordRepository
+    public class MedicalRecordRepository : IMedicalRecordRepository
     {
-        private readonly ClinicaContext _clinicaContext = clinicaContext;
-        private readonly ILogger<MedicalRecordRepository> logger = logger;
+        private readonly ClinicaContext _context;
 
-        public override async Task<OperationResult> Save(MedicalRecord entity)
+        public MedicalRecordRepository(ClinicaContext context)
         {
-            OperationResult operationResult = new OperationResult();
-
-            if (entity == null)
-            {
-                operationResult.Success = false;
-                operationResult.Message = "La entidad es requerida.";
-                return operationResult;
-            }
-
-            try
-            {
-                await _clinicaContext.MedicalRecords.AddAsync(entity);
-                await _clinicaContext.SaveChangesAsync();
-                operationResult.Data = entity;
-                operationResult.Success = true;
-                operationResult.Message = "Historial médico guardado exitosamente.";
-            }
-            catch (Exception ex)
-            {
-                operationResult.Success = false;
-                operationResult.Message = $"Error al guardar el historial médico: {ex.Message}. Detalle: {ex.InnerException?.Message}";
-                logger.LogError(operationResult.Message, ex.ToString());
-            }
-
-            return operationResult;
+            _context = context;
         }
 
-        public override async Task<OperationResult> Update(MedicalRecord entity)
-        {
-            OperationResult operationResult = new OperationResult();
-
-            if (entity == null)
-            {
-                operationResult.Success = false;
-                operationResult.Message = "La entidad es requerida.";
-                return operationResult;
-            }
-
-            if (entity.RecordID <= 0)
-            {
-                operationResult.Success = false;
-                operationResult.Message = "Se requiere el ID del historial médico.";
-                return operationResult;
-            }
-
-            try
-            {
-                var recordToUpdate = await _clinicaContext.MedicalRecords.FindAsync(entity.RecordID);
-                if (recordToUpdate == null)
-                {
-                    operationResult.Success = false;
-                    operationResult.Message = "Historial médico no encontrado.";
-                    return operationResult;
-                }
-
-                recordToUpdate.Diagnosis = entity.Diagnosis;
-                recordToUpdate.Treatment = entity.Treatment;
-                recordToUpdate.DateOfVisit = entity.DateOfVisit;
-                recordToUpdate.UpdatedAt = DateTime.Now;
-
-                _clinicaContext.MedicalRecords.Update(recordToUpdate);
-                await _clinicaContext.SaveChangesAsync();
-                operationResult.Data = recordToUpdate;
-                operationResult.Success = true;
-                operationResult.Message = "Historial médico actualizado exitosamente.";
-            }
-            catch (Exception ex)
-            {
-                operationResult.Success = false;
-                operationResult.Message = "Error actualizando el historial médico.";
-                logger.LogError(operationResult.Message, ex.ToString());
-            }
-
-            return operationResult;
-        }
-
-        public async Task<OperationResult> Remove(int recordID)
-        {
-            OperationResult operationResult = new OperationResult();
-
-            if (recordID <= 0)
-            {
-                operationResult.Success = false;
-                operationResult.Message = "Se requiere el ID del historial médico para eliminarlo.";
-                return operationResult;
-            }
-
-            try
-            {
-                var recordToRemove = await _clinicaContext.MedicalRecords.FindAsync(recordID);
-                if (recordToRemove != null)
-                {
-                    _clinicaContext.MedicalRecords.Remove(recordToRemove);
-                    await _clinicaContext.SaveChangesAsync();
-                    operationResult.Data = recordToRemove;
-                    operationResult.Success = true;
-                    operationResult.Message = "Historial médico eliminado exitosamente.";
-                }
-                else
-                {
-                    operationResult.Success = false;
-                    operationResult.Message = "Historial médico no encontrado.";
-                }
-            }
-            catch (Exception ex)
-            {
-                operationResult.Success = false;
-                operationResult.Message = "Error eliminando el historial médico.";
-                logger.LogError(operationResult.Message, ex.ToString());
-            }
-
-            return operationResult;
-        }
-
+        // Método para obtener todos los registros médicos
         public async Task<OperationResult> GetAll()
         {
-            OperationResult operationResult = new OperationResult();
-
+            var result = new OperationResult();
             try
             {
-                operationResult.Data = await _clinicaContext.MedicalRecords.ToListAsync();
-                operationResult.Success = true;
-                operationResult.Message = "Historiales médicos obtenidos exitosamente.";
+                var data = await _context.MedicalRecords.ToListAsync();
+                result.Success = true;
+                result.Data = data;
             }
             catch (Exception ex)
             {
-                operationResult.Success = false;
-                operationResult.Message = "Error obteniendo los historiales médicos.";
-                logger.LogError(operationResult.Message, ex.ToString());
+                result.Success = false;
+                result.Message = "Error al obtener los registros médicos.";
             }
-
-            return operationResult;
+            return result;
         }
 
-        public async Task<OperationResult> GetById(int recordID)
+        public async Task<OperationResult> Save(MedicalRecord entity)
         {
-            OperationResult operationResult = new OperationResult();
-
-            if (recordID <= 0)
-            {
-                operationResult.Success = false;
-                operationResult.Message = "Se requiere el ID del historial médico.";
-                return operationResult;
-            }
-
+            var result = new OperationResult();
             try
             {
-                operationResult.Data = await _clinicaContext.MedicalRecords
-                    .Where(m => m.RecordID == recordID)
-                    .Select(m => new
-                    {
-                        m.RecordID,
-                        m.Diagnosis,
-                        m.Treatment,
-                        m.DateOfVisit,
-                        m.CreatedAt,
-                        m.UpdatedAt
-                    })
-                    .FirstOrDefaultAsync();
-
-                if (operationResult.Data == null)
-                {
-                    operationResult.Success = false;
-                    operationResult.Message = "Historial médico no encontrado.";
-                }
-                else
-                {
-                    operationResult.Success = true;
-                    operationResult.Message = "Historial médico encontrado exitosamente.";
-                }
+                await _context.MedicalRecords.AddAsync(entity);
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Data = entity;
             }
             catch (Exception ex)
             {
-                operationResult.Success = false;
-                operationResult.Message = "Error obteniendo el historial médico.";
-                logger.LogError($"{operationResult.Message} - Detalles del error: {ex.Message}", ex);
+                result.Success = false;
+                result.Message = "Error al guardar el registro médico.";
             }
+            return result;
+        }
 
-            return operationResult;
+        public async Task<OperationResult> Update(MedicalRecord entity)
+        {
+            var result = new OperationResult();
+            try
+            {
+                _context.MedicalRecords.Update(entity);
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Data = entity;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error al actualizar el registro médico.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> Remove(int id)
+        {
+            var result = new OperationResult();
+            try
+            {
+                var entity = await _context.MedicalRecords.FirstOrDefaultAsync(m => m.RecordID == id);
+                if (entity == null)
+                {
+                    result.Success = false;
+                    result.Message = "Registro médico no encontrado.";
+                    return result;
+                }
+
+                entity.UpdatedAt = DateTime.UtcNow;
+
+                _context.MedicalRecords.Update(entity);
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error al eliminar el registro médico.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetAll(Expression<Func<MedicalRecord, bool>> filter)
+        {
+            var result = new OperationResult();
+            try
+            {
+                var data = await _context.MedicalRecords.Where(filter).ToListAsync();
+                result.Success = true;
+                result.Data = data;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error al obtener los registros médicos.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetEntityBy(int id)
+        {
+            var result = new OperationResult();
+            try
+            {
+                var entity = await _context.MedicalRecords.FirstOrDefaultAsync(m => m.RecordID == id);
+                if (entity == null)
+                {
+                    result.Success = false;
+                    result.Message = "Registro médico no encontrado.";
+                    return result;
+                }
+                result.Success = true;
+                result.Data = entity;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error al obtener el registro médico.";
+            }
+            return result;
+        }
+
+        public async Task<bool> Exists(Expression<Func<MedicalRecord, bool>> filter)
+        {
+            return await _context.MedicalRecords.AnyAsync(filter);
         }
     }
 }
-

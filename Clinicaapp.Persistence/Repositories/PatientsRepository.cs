@@ -64,15 +64,16 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
 
             try
             {
-                var saveResult = await base.Save(entity);
 
-                if (saveResult.Success)
+                await _clinicaContext.Patients.AddAsync(entity);
+                await _clinicaContext.SaveChangesAsync();
+
+                return new OperationResult
                 {
-                    saveResult.Message = "Paciente guardado exitosamente.";
-                    saveResult.Data = entity;
-                }
-
-                return saveResult;
+                    Success = true,
+                    Message = "Paciente guardado exitosamente.",
+                    Data = entity
+                };
             }
             catch (Exception ex)
             {
@@ -84,7 +85,6 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 };
             }
         }
-
         public async override Task<OperationResult> Update(Patients entity)
         {
             var validation = ValidateEntity(entity, true);
@@ -159,7 +159,6 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 };
             }
         }
-
         public async Task<OperationResult> GetAll()
         {
             try
@@ -182,7 +181,6 @@ namespace Clinicaapp.Persistence.Repositories.Configuracion
                 };
             }
         }
-
         public async Task<OperationResult> GetEntityBy(int id)
         {
             try

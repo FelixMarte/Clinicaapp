@@ -3,6 +3,7 @@ using Clinicaapp.Application.Dtos.Configuration.Patients;
 using Clinicaapp.Application.Responses.Configuration.Patients;
 using Clinicaapp.Domain.Entities.Configuration;
 using Clinicaapp.Persistence.Interfaces.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 
@@ -65,12 +66,13 @@ namespace Clinicaapp.Application.Services
             return patientsResponse;
         }
 
+
         public async Task<PatientsResponse> SaveAsync(PatientsSaveDto dto)
         {
-            var patientsResponse = new PatientsResponse();
+            PatientsResponse patientResponse = new PatientsResponse();
             try
             {
-                var patient = new Patients
+                Patients patient = new Patients
                 {
                     DateOfBirth = dto.DateOfBirth,
                     Gender = dto.Gender,
@@ -80,29 +82,28 @@ namespace Clinicaapp.Application.Services
                     EmergencyContactPhone = dto.EmergencyContactPhone,
                     BloodType = dto.BloodType,
                     Allergies = dto.Allergies,
-                    IsActive = dto.IsActive,
-                    CreatedAt = dto.CreatedAt
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true
                 };
 
                 var result = await _patientsRepository.Save(patient);
+
                 if (!result.Success)
                 {
-                    patientsResponse.Succes = false;
-                    patientsResponse.Message = result.Message;
-                    return patientsResponse;
+                    patientResponse.Succes = false;
+                    patientResponse.Message = result.Message;
                 }
-
-                patientsResponse.Succes = true;
-                patientsResponse.Message = "Paciente guardado exitosamente.";
-                patientsResponse.Data = result.Data;
+                patientResponse.Succes = true;
+                patientResponse.Message = "Paciente guardado exitosamente.";
+                patientResponse.Data = result.Data;
             }
             catch (Exception ex)
             {
-                patientsResponse.Succes = false;
-                patientsResponse.Message = "Error guardando el paciente.";
-                _logger.LogError(patientsResponse.Message, ex.ToString());
+                patientResponse.Succes = false;
+                patientResponse.Message = "Error guardando el paciente.";
+                _logger.LogError(ex, "Error guardando el paciente.");
             }
-            return patientsResponse;
+            return patientResponse;
         }
 
         public async Task<PatientsResponse> UpdateAsync(PatientsUpdateDto dto)

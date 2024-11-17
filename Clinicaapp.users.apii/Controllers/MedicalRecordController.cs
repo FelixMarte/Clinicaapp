@@ -1,115 +1,100 @@
-﻿using Clinicaapp.Domain.Entities.Configuration;
-using Clinicaapp.Persistence.Interfaces.Configuration;
-using Clinicaapp.Persistence.Repositories.Configuracion;
-using Clinicaapp.users.apii.ProvidEntities;
+﻿using Clinicaapp.Application.Contracts;
+using Clinicaapp.Application.Dtos.Configuration.MedicalRecord;
+using Clinicaapp.Domain.Entities.Configuration;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinicaapp.users.apii.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class MedicalRecordController : ControllerBase
     {
-        private readonly IMedicalRecordRepository _medicalRecordRepository;
+        private readonly IMedicalRecordService _medicalRecordService;
 
-        public MedicalRecordController(IMedicalRecordRepository medicalRecordRepository)
+        public MedicalRecordController(IMedicalRecordService medicalRecordService)
         {
-            _medicalRecordRepository = medicalRecordRepository;
+            _medicalRecordService = medicalRecordService;
         }
 
         [HttpGet("GetAllMedicalRecords")]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _medicalRecordRepository.GetAll();
-
-            if (!result.Success)
+            var result = await _medicalRecordService.GetAll();
+            if (!result.Succes)
             {
-                return BadRequest(result);
+                return NotFound(new { Message = result.Message });
             }
-            return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var result = await _medicalRecordRepository.GetEntityBy(id);
-
-            if (!result.Success)
-            {
-                return NotFound(result.Message);
-            }
-
             return Ok(result.Data);
         }
 
+        // GET: api/MedicalRecord/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(new { Message = "El ID debe ser mayor que cero." }); 
+            }
 
+            var result = await _medicalRecordService.GetById(id);
+
+            if (!result.Succes)
+            {
+                return NotFound(new { Message = result.Message }); 
+            }
+
+            return Ok(result.Data); // Devuelve 200 con el registro encontrado
+        }
+
+        // POST: api/MedicalRecord
         [HttpPost]
-        public async Task<ActionResult<MedicalRecord>> Create([FromBody] MedicalRecord record)
+        public async Task<IActionResult> Create([FromBody] MedicalRecordSaveDto dto)
         {
-            if (!ModelState.IsValid)
+            var response = await _medicalRecordService.SaveAsync(dto);
+            if (!response.Succes)
             {
-                return BadRequest(ModelState);
+                return BadRequest(response.Message);
             }
 
-            record.CreatedAt = DateTime.Now;
-
-            var operationResult = await _medicalRecordRepository.Save(record);
-
-            if (!operationResult.Success)
-            {
-                return BadRequest(operationResult.Message);
-            }
-
-            var createdRecord = operationResult.Data as MedicalRecord;
-
-            return CreatedAtAction(nameof(GetById), new { id = createdRecord.RecordID }, createdRecord);
+            return Ok(response);
         }
 
+        // PUT: api/MedicalRecord/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, [FromBody] MedicalRecord updatedRecord)
+        public async Task<IActionResult> Update(int id, [FromBody] MedicalRecordUpdateDto dto)
         {
-            if (!ModelState.IsValid)
+            if (dto == null || dto.RecordID != id)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new { Message = "El ID del historial médico no coincide con el proporcionado." });
             }
 
-            var operationResult = await _medicalRecordRepository.GetEntityBy(id);
+            var result = await _medicalRecordService.UpdateAsync(dto);
 
-            if (!operationResult.Success)
+            if (!result.Succes)
             {
-                return NotFound(operationResult.Message);
+                return NotFound(new { Message = result.Message }); // Devuelve 404 si no se encuentra el registro
             }
 
-            var existingRecord = operationResult.Data as MedicalRecord;
-            if (existingRecord == null)
-            {
-                return NotFound("El registro médico no se encontró.");
-            }
-
-            existingRecord.Diagnosis = updatedRecord.Diagnosis;
-            existingRecord.Treatment = updatedRecord.Treatment;
-            existingRecord.DateOfVisit = updatedRecord.DateOfVisit;
-            existingRecord.UpdatedAt = DateTime.Now;
-
-
-            await _medicalRecordRepository.Update(existingRecord);
-
-            return NoContent();
+            return NoContent(); // Devuelve 204 si la actualización fue exitosa
         }
-        
-        [HttpDelete("Delete")]
+
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _medicalRecordRepository.Remove(id);
-            if (!result.Success)
+            if (id <= 0)
             {
-                return BadRequest(result);
-
+                return BadRequest(new { Message = "El ID debe ser mayor que cero." });
             }
-            return Ok(result);
-        }
-       
 
+            var result = await _medicalRecordService.DeleteAsync(id);
+
+            if (!result.Succes)
+            {
+                return NotFound(new { Message = result.Message });
+            }
+
+            return NoContent(); // Devuelve 204 si el borrado fue exitoso
+        }
     }
 }
 

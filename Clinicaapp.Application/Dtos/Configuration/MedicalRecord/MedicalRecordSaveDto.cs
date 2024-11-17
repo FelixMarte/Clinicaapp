@@ -8,6 +8,8 @@ namespace Clinicaapp.Application.Dtos.Configuration.MedicalRecord
 {
     public class MedicalRecordSaveDto : BaseMedicalRecord
     {
-        
+        public string Diagnosis { get; set; }
+        public string Treatment { get; set; }
+        public DateTime DateOfVisit { get; set; }
     }
 }

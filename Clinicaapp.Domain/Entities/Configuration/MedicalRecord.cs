@@ -15,12 +15,12 @@ namespace Clinicaapp.Domain.Entities.Configuration
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        // Constructor
         public MedicalRecord()
         {
-            CreatedAt = DateTime.Now;
+            CreatedAt = DateTime.UtcNow;
         }
-
     }
+
 }
+
 
