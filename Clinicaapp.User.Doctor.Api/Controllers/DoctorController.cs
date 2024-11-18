@@ -1,5 +1,5 @@
-﻿using Clinicaapp.Domain.Entities.Configuration;
-using Clinicaapp.Persistence.Interfaces.Configuracion;
+﻿using Clinicaapp.Application.Contracts;
+using Clinicaapp.Application.Dtos.Configuracion.Doctor;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinicaapp.Users.Api.Controllers
@@ -8,17 +8,18 @@ namespace Clinicaapp.Users.Api.Controllers
     [ApiController]
     public class DoctorController : ControllerBase
     {
-        private readonly IDoctorsRepository _doctorsRepository;
+        private readonly IDoctorService _doctorService;
 
-        public DoctorController(IDoctorsRepository doctorsRepository) {
-            _doctorsRepository = doctorsRepository;
+
+        public DoctorController(IDoctorService doctorService) {
+            _doctorService = doctorService;
         }
 
 
         [HttpGet("GetDoctors")]
         public async Task<IActionResult> Get()
         {
-            var result = await _doctorsRepository.GetAll();
+            var result = await _doctorService.GetAll();
             if (!result.Succes)
             {
                 return BadRequest(result);
@@ -27,10 +28,10 @@ namespace Clinicaapp.Users.Api.Controllers
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet("GetDoctorById")]
         public async Task<IActionResult> Get(int id)
         {
-            var result = await _doctorsRepository.GetEntityBy(id);
+            var result = await _doctorService.GetById(id);
             if (!result.Succes)
             {
                 return NotFound(result);
@@ -40,9 +41,9 @@ namespace Clinicaapp.Users.Api.Controllers
 
 
         [HttpPost("SaveDoctor")]
-        public async Task<IActionResult>  Post([FromBody] Doctors doctors)
+        public async Task<IActionResult>  Post([FromBody] DoctorSaveDto doctorSaveDto)
         {
-            var result = await _doctorsRepository.Save(doctors);
+            var result = await _doctorService.SaveAsync(doctorSaveDto);
             if (!result.Succes)
             {
                 return BadRequest(result);
@@ -51,15 +52,15 @@ namespace Clinicaapp.Users.Api.Controllers
         }
 
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Doctors doctor)
+        [HttpPut("UpdateDoctor")]
+        public async Task<IActionResult> Put(int id, [FromBody] DoctorUpdateDto doctorUpdateDto)
         {
-            if (id != doctor.DoctorID) 
+            if (id != doctorUpdateDto.DoctorID) 
             {
                 return BadRequest("El ID no coincide con el doctor proporcionado.");
             }
 
-            var result = await _doctorsRepository.Update(doctor);
+            var result = await _doctorService.UpdateAsync(doctorUpdateDto);
             if (!result.Succes)
             {
                 return BadRequest(result);
@@ -69,10 +70,10 @@ namespace Clinicaapp.Users.Api.Controllers
 
 
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteDoctor")]
         public async Task<IActionResult>  Delete(int id)
         {
-            var result = await _doctorsRepository.Delete(id); 
+            var result = await _doctorService.DeleteAsync(id); 
             if (!result.Succes)
             {
                 return BadRequest(result);

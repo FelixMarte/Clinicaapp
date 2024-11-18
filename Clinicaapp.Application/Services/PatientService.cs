@@ -1,119 +1,117 @@
-﻿
-
-using Clinicaapp.Application.contracts;
-using Clinicaapp.Application.Dtos.Configuracion.Doctor;
+﻿using Clinicaapp.Application.contracts;
 using Clinicaapp.Application.Dtos.Configuracion.Patient;
-using Clinicaapp.Application.Reponses.Configuracion.Doctors;
 using Clinicaapp.Application.Reponses.Configuracion.Patients;
 using Clinicaapp.Domain.Entities.Configuration;
 using Clinicaapp.Persistence.Interfaces.Configuracion;
-using Clinicaapp.Persistence.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Clinicaapp.Application.Services
 {
     public class PatientService : IPatientService
     {
-        private readonly IPatientsRepository _patientsRepository;   
+        private readonly IPatientsRepository _patientsRepository;
         private readonly ILogger<PatientService> _logger;
 
-        public PatientService( IPatientsRepository patientsRepository, ILogger<PatientService> logger)
+        public PatientService(IPatientsRepository patientsRepository, ILogger<PatientService> logger)
         {
             _patientsRepository = patientsRepository;
             _logger = logger;
         }
+
         public async Task<PatientResponse> GetAll()
         {
-            PatientResponse patientResponse = new PatientResponse();
+            var patientResponse = new PatientResponse();
             try
             {
                 var result = await _patientsRepository.GetAll();
                 if (!result.Succes)
                 {
                     patientResponse.Message = result.Message;
-                    patientResponse.Succes = result.Succes;
+                    patientResponse.Succes = false;
+                    _logger.LogWarning("Error obteniendo pacientes: {Message}", result.Message);
                     return patientResponse;
-
                 }
+
                 patientResponse.Data = result.Data;
+                patientResponse.Succes = true;
+                patientResponse.Message = "Pacientes obtenidos exitosamente.";
+                _logger.LogWarning("Error en el repositorio al obtener pacients: {Message}", result.Message);
             }
             catch (Exception ex)
             {
                 patientResponse.Succes = false;
-                patientResponse.Message = "Error Obteniendo los Pasientes.";
-                _logger.LogError(patientResponse.Message, ex.ToString());
+                patientResponse.Message = "Error obteniendo los pacientes.";
+                _logger.LogError(ex, patientResponse.Message);
             }
             return patientResponse;
         }
 
         public async Task<PatientResponse> GetById(int id)
         {
-            PatientResponse patientResponse = new PatientResponse();
+            var patientResponse = new PatientResponse();
             try
             {
                 var result = await _patientsRepository.GetEntityBy(id);
                 if (!result.Succes)
                 {
                     patientResponse.Message = result.Message;
-                    patientResponse.Succes = result.Succes;
+                    patientResponse.Succes = false;
                     return patientResponse;
-
                 }
+
                 patientResponse.Data = result.Data;
+                patientResponse.Succes = true;
+                patientResponse.Message = "Paciente obtenido exitosamente.";
             }
             catch (Exception ex)
             {
                 patientResponse.Succes = false;
-                patientResponse.Message = "Error Obteniendo el Pasiente.";
-                _logger.LogError(patientResponse.Message, ex.ToString());
+                patientResponse.Message = "Error obteniendo el paciente.";
+                _logger.LogError(ex, patientResponse.Message);
             }
             return patientResponse;
         }
 
         public async Task<PatientResponse> SaveAsync(PatientSaveDto dto)
         {
-            PatientResponse patientResponse = new PatientResponse();
-
+            var patientResponse = new PatientResponse();
             try
             {
-                Patients patients = new Patients();
-
-                patients.DateOfBirth = dto.DateOfBirth;
-                patients.Address = dto.Address;
-                patients.EmergencyContactName = dto.EmergencyContactName;
-                patients.EmergencyContactPhone = dto.EmergencyContactPhone;
-                patients.BloodType = dto.BloodType;
-                patients.Allergies = dto.Allergies;
-                patients.PhoneNumber = dto.PhoneNumber;
-
-
-                var result = await _patientsRepository.Save(patients);
-
-                if (!result.Succes)
+                var patient = new Patients
                 {
-                    patientResponse.Succes = false;
-                    patientResponse.Message = result.Message;
-                }
-                patientResponse.Succes = true;
-                patientResponse.Message = "Doctor guardado exitosamente.";
+                    PatientID = dto.PatientID,
+                    Gender = dto.Gender,
+                    DateOfBirth = dto.DateOfBirth,
+                    Address = dto.Address,
+                    EmergencyContactName = dto.EmergencyContactName,
+                    EmergencyContactPhone = dto.EmergencyContactPhone,
+                    BloodType = dto.BloodType,
+                    Allergies = dto.Allergies,
+                    PhoneNumber = dto.PhoneNumber,
+                    IsActive = dto.IsActive,
+                    CreatedAt = dto.CreatedAt,
+                };
+
+                var result = await _patientsRepository.Save(patient);
+                patientResponse.Succes = result.Succes;
+                patientResponse.Message = result.Succes ? "Paciente guardado exitosamente." : result.Message;
                 patientResponse.Data = result.Data;
             }
             catch (Exception ex)
             {
                 patientResponse.Succes = false;
-                patientResponse.Message = "Error guardando el doctor.";
-                _logger.LogError(patientResponse.Message, ex.ToString());
+                patientResponse.Message = "Error guardando el paciente.";
+                _logger.LogError(ex, patientResponse.Message);
             }
-
             return patientResponse;
         }
+
         public async Task<PatientResponse> UpdateAsync(PatientUpdateDto dto)
         {
-            PatientResponse patientResponse = new PatientResponse();
+            var patientResponse = new PatientResponse();
             try
             {
                 var resultGetById = await _patientsRepository.GetEntityBy(dto.PatientID);
-
                 if (!resultGetById.Succes)
                 {
                     patientResponse.Succes = resultGetById.Succes;
@@ -121,7 +119,7 @@ namespace Clinicaapp.Application.Services
                     return patientResponse;
                 }
 
-                Patients patients = new Patients
+                var patient = new Patients
                 {
                     PatientID = dto.PatientID,
                     DateOfBirth = dto.DateOfBirth,
@@ -129,25 +127,50 @@ namespace Clinicaapp.Application.Services
                     EmergencyContactName = dto.EmergencyContactName,
                     EmergencyContactPhone = dto.EmergencyContactPhone,
                     BloodType = dto.BloodType,
-                    Allergies = dto.Allergies,
-                    PhoneNumber = dto.PhoneNumber
+                    Allergies = dto.Allergies,                    
+                    PhoneNumber = dto.PhoneNumber,
+                    IsActive = dto.IsActive,
+                    UpdatedAt = dto.UpdatedAt,
                 };
 
-
-                var result = await _patientsRepository.Update(patients);
-
+                var result = await _patientsRepository.Update(patient);
                 patientResponse.Succes = result.Succes;
-                patientResponse.Message = result.Message;
+                patientResponse.Message = result.Succes ? "Paciente actualizado exitosamente." : result.Message;
                 patientResponse.Data = result.Data;
             }
             catch (Exception ex)
             {
                 patientResponse.Succes = false;
-                patientResponse.Message = "Error actualizando el Doctor.";
-                _logger.LogError(patientResponse.Message, ex.ToString());
+                patientResponse.Message = "Error actualizando el paciente.";
+                _logger.LogError(ex, patientResponse.Message);
             }
             return patientResponse;
         }
 
+        public async Task<PatientResponse> DeleteAsync(int id)
+        {
+            var patientResponse = new PatientResponse();
+            try
+            {
+                var resultGetById = await _patientsRepository.GetEntityBy(id);
+                if (!resultGetById.Succes)
+                {
+                    patientResponse.Succes = false;
+                    patientResponse.Message = "Paciente no encontrado para eliminar.";
+                    return patientResponse;
+                }
+
+                var resultDelete = await _patientsRepository.Delete(id);
+                patientResponse.Succes = resultDelete.Succes;
+                patientResponse.Message = resultDelete.Succes ? "Paciente eliminado exitosamente." : "Error eliminando el paciente.";
+            }
+            catch (Exception ex)
+            {
+                patientResponse.Succes = false;
+                patientResponse.Message = "Error eliminando el paciente.";
+                _logger.LogError(ex, patientResponse.Message);
+            }
+            return patientResponse;
+        }
     }
 }

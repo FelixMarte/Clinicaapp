@@ -5,6 +5,8 @@ using Clinicaapp.Domain.Entities.Configuration;
 using Clinicaapp.Persistence.Interfaces.Configuracion;
 using Microsoft.Extensions.Logging;
 
+
+
 namespace Clinicaapp.Application.Services
 {
     public class DoctorService : IDoctorService
@@ -20,7 +22,7 @@ namespace Clinicaapp.Application.Services
 
         public async Task<DoctorResponse> GetAll()
         {
-           DoctorResponse doctorResponse = new DoctorResponse();
+            DoctorResponse doctorResponse = new DoctorResponse();
             try
             {
                 var result = await _doctorsRepository.GetAll();
@@ -28,79 +30,82 @@ namespace Clinicaapp.Application.Services
                 {
                     doctorResponse.Message = result.Message;
                     doctorResponse.Succes = result.Succes;
-                    return doctorResponse;
-
+                    _logger.LogWarning("Error en el repositorio al obtener doctores: {Message}", result.Message);
+                    return doctorResponse; 
                 }
                 doctorResponse.Data = result.Data;
+                doctorResponse.Succes = true;
+                doctorResponse.Message = "Doctores obtenidos exitosamente.";
+                _logger.LogWarning("Error en el repositorio al obtener doctores: {Message}", result.Message);
             }
             catch (Exception ex)
             {
                 doctorResponse.Succes = false;
-                doctorResponse.Message = "Error Obteniendo los Doctores.";
-                _logger.LogError(doctorResponse.Message, ex.ToString());
+                doctorResponse.Message = "Error obteniendo los doctores.";
+                _logger.LogError(ex, doctorResponse.Message);
             }
             return doctorResponse;
         }
         public async Task<DoctorResponse> GetById(int id)
         {
-            DoctorResponse doctorResponse = new DoctorResponse();
+            var doctorResponse = new DoctorResponse();
             try
             {
                 var result = await _doctorsRepository.GetEntityBy(id);
                 if (!result.Succes)
                 {
                     doctorResponse.Message = result.Message;
-                    doctorResponse.Succes = result.Succes;
+                    doctorResponse.Succes = false;
                     return doctorResponse;
-
                 }
+
                 doctorResponse.Data = result.Data;
+                doctorResponse.Succes = true;
+                doctorResponse.Message = "Doctor obtenido exitosamente.";
             }
             catch (Exception ex)
             {
                 doctorResponse.Succes = false;
-                doctorResponse.Message = "Error Obteniendo el Doctores.";
-                _logger.LogError(doctorResponse.Message, ex.ToString());
+                doctorResponse.Message = "Error obteniendo el doctor.";
+                _logger.LogError(ex, doctorResponse.Message);
             }
             return doctorResponse;
         }
         public async Task<DoctorResponse> SaveAsync(DoctorSaveDto dto)
         {
-            DoctorResponse doctorResponse = new DoctorResponse();
-
+            var doctorResponse = new DoctorResponse();
             try
             {
-                Doctors doctor = new Doctors();
-
-                doctor.YearsOfExperience = dto.YearsOfExperience;
-                doctor.Education = dto.Education;
-                doctor.Bio = dto.Bio;
-                doctor.ConsultationFee = dto.ConsultationFee;
-                doctor.ClinicAddress = dto.ClinicAddress;
-                doctor.LicenseNumber = dto.LicenseNumber;
-                doctor.LicenseExpirationDate = dto.LicenseExpirationDate;
-                doctor.IsActive = dto.IsActive;
-                doctor.PhoneNumber = dto.PhoneNumber;
-
-                
-                var result = await _doctorsRepository.Save(doctor);
-
-                if (!result.Succes)
+                var doctor = new Doctors
                 {
-                    doctorResponse.Succes = false;
-                    doctorResponse.Message = result.Message;
-                }
-                doctorResponse.Succes = true;
-                doctorResponse.Message = "Doctor guardado exitosamente.";
+                    DoctorID = dto.DoctorID,
+                    YearsOfExperience = dto.YearsOfExperience,
+                    Education = dto.Education,
+                    Bio = dto.Bio,
+                    ConsultationFee = dto.ConsultationFee,
+                    ClinicAddress = dto.ClinicAddress,
+                    LicenseNumber = dto.LicenseNumber,
+                    LicenseExpirationDate = dto.LicenseExpirationDate,
+                    IsActive = dto.IsActive,
+                    PhoneNumber = dto.PhoneNumber,
+                    CreatedAt = dto.CreatedAt,
+
+
+                };
+                
+
+
+                var result = await _doctorsRepository.Save(doctor);
+                doctorResponse.Succes = result.Succes;
+                doctorResponse.Message = result.Succes ? "Doctor guardado exitosamente." : result.Message;
                 doctorResponse.Data = result.Data;
             }
             catch (Exception ex)
             {
                 doctorResponse.Succes = false;
                 doctorResponse.Message = "Error guardando el doctor.";
-                _logger.LogError(doctorResponse.Message, ex.ToString());
+                _logger.LogError(ex, doctorResponse.Message);
             }
-
             return doctorResponse;
         }
         public async Task<DoctorResponse> UpdateAsync(DoctorUpdateDto dto)
@@ -126,16 +131,17 @@ namespace Clinicaapp.Application.Services
                     ConsultationFee = dto.ConsultationFee,
                     ClinicAddress = dto.ClinicAddress,
                     LicenseNumber = dto.LicenseNumber,
-                    LicenseExpirationDate = dto.LicenseExpirationDate,
+                    LicenseExpirationDate = dto.LicenseExpirationDate,                    
+                    PhoneNumber = dto.PhoneNumber,
                     IsActive = dto.IsActive,
-                    PhoneNumber = dto.PhoneNumber
+                    UpdatedAt = dto.UpdatedAt,
                 };
 
          
                 var result = await _doctorsRepository.Update(doctor);
 
                 doctorResponse.Succes = result.Succes;
-                doctorResponse.Message = result.Message;
+                doctorResponse.Message = result.Succes ? "Doctor actualizado exitosamente." : result.Message;
                 doctorResponse.Data = result.Data;
             }
             catch (Exception ex)
@@ -146,7 +152,35 @@ namespace Clinicaapp.Application.Services
             }
             return doctorResponse;
         }
-        
+        public async Task<DoctorResponse> DeleteAsync(int id)
+        {
+            DoctorResponse doctorResponse = new DoctorResponse();
+            try
+            {
+                var resultGetById = await _doctorsRepository.GetEntityBy(id);
+                if (!resultGetById.Succes)
+                {
+                    doctorResponse.Succes = false;
+                    doctorResponse.Message = "Doctor no encontrado para eliminar.";
+                    return doctorResponse;
+                }
+
+                var resultDelete = await _doctorsRepository.Delete(id);
+                doctorResponse.Succes = resultDelete.Succes;
+                doctorResponse.Message = resultDelete.Succes ? "Doctor eliminado exitosamente." : "Error eliminando el doctor.";
+            }
+            catch (Exception ex)
+            {
+                doctorResponse.Succes = false;
+                doctorResponse.Message = "Error eliminando el Doctor.";
+                _logger.LogError(doctorResponse.Message, ex.ToString());
+            }
+            return doctorResponse;
+        }
+
+
+
+
     }
 }
 

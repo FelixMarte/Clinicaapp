@@ -4,6 +4,7 @@ namespace Clinicaapp.Application.Dtos.Configuracion.Doctor
 {
     public abstract class DoctorDtoBase : DtoBase
     {
+        public int DoctorID { get; set; }
         public int YearsOfExperience { get; set; }
         public string? Education { get; set; }
         public string? Bio { get; set; }

@@ -9,6 +9,7 @@ namespace Clinicaapp.Domain.Entities.Configuration
     {
         [Key]
 
+
         public int DoctorID { get; set; }
         public int YearsOfExperience { get; set; }
         public string? Education {  get; set; }

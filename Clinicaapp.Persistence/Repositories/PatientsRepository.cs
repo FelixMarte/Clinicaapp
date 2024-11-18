@@ -75,9 +75,7 @@ namespace Clinicaapp.Persistence.Repositories
                 ValidatePatient(entity);
 
 
-                var existingPatient = await context.Patients
-                    .FirstOrDefaultAsync(p => p.PatientID == entity.PatientID);
-
+                var existingPatient = await context.Patients.FindAsync(entity.PatientID);
                 if (existingPatient == null)
                 {
                     result.Succes = false;
@@ -94,6 +92,9 @@ namespace Clinicaapp.Persistence.Repositories
                 existingPatient.BloodType = entity.BloodType;
                 existingPatient.Allergies = entity.Allergies;
                 existingPatient.PhoneNumber = entity.PhoneNumber;
+                existingPatient.UpdatedAt = DateTime.Now;
+                existingPatient.IsActive = entity.IsActive;
+                
 
 
 
@@ -123,7 +124,7 @@ namespace Clinicaapp.Persistence.Repositories
             try
             {
                 var patients = await (from patient in context.Patients
-                                      orderby patient.PatientID descending
+                                      orderby patient.CreatedAt descending
                                       select new PatientsModel()
                                       {
                                           PatientID = patient.PatientID,
@@ -133,20 +134,25 @@ namespace Clinicaapp.Persistence.Repositories
                                           EmergencyContactName = patient.EmergencyContactName,
                                           EmergencyContactPhone = patient.EmergencyContactPhone,
                                           BloodType = patient.BloodType,
-                                          Allergies = patient.Allergies,
+                                          Allergies = patient.Allergies,                                          
                                           PhoneNumber = patient.PhoneNumber,
+                                          IsActive = patient.IsActive,
+                                          CreatedAt = patient.CreatedAt,
+                                          UpdatedAt = patient.UpdatedAt,
                                       }).ToListAsync();
 
                 if (patients == null || !patients.Any())
                 {
                     result.Succes = false;
                     result.Message = "No se encontraron pacientes en la base de datos.";
+                    logger.LogWarning(result.Message);
                 }
                 else
                 {
                     result.Succes = true;
                     result.Message = "Pacientes encontrados exitosamente.";
                     result.Data = patients;
+                    logger.LogInformation("Cantidad de doctores obtenidos: {Count}", patients.Count);
                 }
             }
             catch (Exception ex)
@@ -175,8 +181,11 @@ namespace Clinicaapp.Persistence.Repositories
                                                   EmergencyContactName = patient.EmergencyContactName,
                                                   EmergencyContactPhone = patient.EmergencyContactPhone,
                                                   BloodType = patient.BloodType,
-                                                  Allergies = patient.Allergies,
+                                                  Allergies = patient.Allergies,                                                 
                                                   PhoneNumber = patient.PhoneNumber,
+                                                  IsActive = patient.IsActive,
+                                                  CreatedAt = patient.CreatedAt,
+                                                  UpdatedAt = patient.UpdatedAt,
                                               }).FirstOrDefaultAsync();
 
                 if (operationResult.Data == null)

@@ -1,8 +1,9 @@
+
 using Clinicaapp.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Clinicaapp.Web.Controllers
+namespace BoletosApp.Web.Controllers
 {
     public class HomeController : Controller
     {

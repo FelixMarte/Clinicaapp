@@ -1,8 +1,11 @@
+using Clinicaapp.Application.contracts;
+using Clinicaapp.Application.Contracts;
+using Clinicaapp.Application.Services;
 using Clinicaapp.Persistence.Context;
 using Clinicaapp.Persistence.Interfaces.Configuracion;
 using Clinicaapp.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +13,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ClinicaContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ClinicaappDb")));
 
-//REGISTRO DE DEPENDENCIAS REPOSITORIOS
 builder.Services.AddScoped<IDoctorsRepository, DoctorsRepository>();
 builder.Services.AddScoped<IPatientsRepository, PatientsRepository>();
 
 //REGISTRO DE DEPENDENCIAS SERVICIOS
+builder.Services.AddTransient<IDoctorService, DoctorService>();
+builder.Services.AddTransient<IPatientService, PatientService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -29,6 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseAuthorization();
 

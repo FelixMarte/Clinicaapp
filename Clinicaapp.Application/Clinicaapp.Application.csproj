@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Clinicaapp.Infraestructure\Clinicaapp.Infraestructure.csproj" />
     <ProjectReference Include="..\Clinicaapp.Persistence\Clinicaapp.Persistence.csproj" />
   </ItemGroup>
 

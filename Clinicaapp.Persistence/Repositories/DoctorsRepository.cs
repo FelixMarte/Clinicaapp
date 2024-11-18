@@ -66,7 +66,7 @@ namespace Clinicaapp.Persistence.Repositories
             OperationResult result = new OperationResult();
             try
             {
-                // Obtén el doctor existente
+                
                 var existingDoctor = await context.Doctors.FindAsync(entity.DoctorID); 
                 if (existingDoctor == null)
                 {
@@ -83,7 +83,7 @@ namespace Clinicaapp.Persistence.Repositories
                 existingDoctor.ClinicAddress = entity.ClinicAddress;
                 existingDoctor.LicenseNumber = entity.LicenseNumber;
                 existingDoctor.LicenseExpirationDate = entity.LicenseExpirationDate;
-                existingDoctor.UpdatedAt = DateTime.UtcNow; 
+                existingDoctor.UpdatedAt = DateTime.Now; 
                 existingDoctor.IsActive = entity.IsActive;
                 existingDoctor.PhoneNumber = entity.PhoneNumber;
 
@@ -121,25 +121,30 @@ namespace Clinicaapp.Persistence.Repositories
                                          ConsultationFee = doctor.ConsultationFee,
                                          ClinicAddress = doctor.ClinicAddress,
                                          LicenseExpirationDate = doctor.LicenseExpirationDate,
+                                         IsActive = doctor.IsActive,
+                                         CreatedAt = doctor.CreatedAt,
+                                         UpdatedAt = doctor.UpdatedAt,
                                      }).ToListAsync();
 
                 if (doctors == null || !doctors.Any())
                 {
                     result.Succes = false;
                     result.Message = "No se encontraron doctores en la base de datos.";
+                    logger.LogWarning(result.Message);
                 }
                 else
                 {
                     result.Succes = true;
                     result.Message = "Doctores encontrados exitosamente.";
                     result.Data = doctors;
+                    logger.LogInformation("Cantidad de doctores obtenidos: {Count}", doctors.Count);
                 }
             }
             catch (Exception ex)
             {
                 result.Succes = false;
                 result.Message = $"Error al obtener los doctores: {ex.Message}";
-                logger.LogError(result.Message, ex.ToString());
+                logger.LogError(ex, result.Message);
             }
 
             return result;
@@ -163,7 +168,9 @@ namespace Clinicaapp.Persistence.Repositories
                                                  ConsultationFee = doctor.ConsultationFee,
                                                  ClinicAddress = doctor.ClinicAddress,
                                                  LicenseExpirationDate = doctor.LicenseExpirationDate,
-
+                                                 IsActive = doctor.IsActive,
+                                                 CreatedAt = doctor.CreatedAt,
+                                                 UpdatedAt = doctor.UpdatedAt,
                                              }).FirstOrDefaultAsync();
 
                 if (operationResult.Data == null)
