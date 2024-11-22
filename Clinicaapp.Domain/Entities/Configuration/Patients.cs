@@ -1,6 +1,4 @@
-﻿
-
-using Clinicaapp.Domain.Base;
+﻿using Clinicaapp.Domain.Base;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

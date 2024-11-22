@@ -1,0 +1,49 @@
+﻿@model Clinicaapp.Application.Dtos.Configuration.Patients.GetPatients
+
+@{
+    ViewData["Title"] = "Detalles del Paciente";
+}
+
+<h1>Detalles del Paciente</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-3">ID del Paciente</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.PatientID)</dd>
+
+        <dt class="col-sm-3">Fecha de Nacimiento</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.DateOfBirth)</dd>
+
+        <dt class="col-sm-3">Género</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Gender)</dd>
+
+        <dt class="col-sm-3">Teléfono</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+
+        <dt class="col-sm-3">Dirección</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Address)</dd>
+
+        <dt class="col-sm-3">Contacto de Emergencia</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.EmergencyContactName)</dd>
+
+        <dt class="col-sm-3">Teléfono de Emergencia</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.EmergencyContactPhone)</dd>
+
+        <dt class="col-sm-3">Grupo Sanguíneo</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.BloodType)</dd>
+
+        <dt class="col-sm-3">Alergias</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Allergies)</dd>
+
+        <dt class="col-sm-3">Creado el</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedAt)</dd>
+
+        <dt class="col-sm-3">Activo</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.IsActive)</dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.PatientID" class="btn btn-primary">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+</div>

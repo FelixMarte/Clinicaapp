@@ -1,14 +1,11 @@
 ﻿using Clinicaapp.Application.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Clinicaapp.Application.Dtos.Configuration.MedicalRecord;
+
 
 namespace Clinicaapp.Application.Responses.Configuration.MedicalRecord
 {
     public class MedicalRecordResponse : BaseResponse
     {
-        public dynamic? Data { get; set; }
+        public List<GetMedicalRecords>? Data { get; set; }
     }
 }

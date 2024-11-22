@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Clinicaapp.Application.Dtos.Configuration.MedicalRecord.GetMedicalRecords>
+
+@{
+    ViewData["Title"] = "Index";
+} 
+
+<h1>Todos Los Records</h1>
+
+<p>
+    <a asp-action="Create">Creacion de Records</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.RecordID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Diagnosis)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Treatment)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateOfVisit)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedAt)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.RecordID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Diagnosis)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Treatment)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateOfVisit)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedAt)
+            </td>
+            <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.RecordID }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.RecordID }) 
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -32,7 +32,34 @@ namespace Clinicaapp.Application.Services
                     patientsResponse.Succes = result.Success;
                     return patientsResponse;
                 }
-                patientsResponse.Data = result.Data;
+
+                // Aquí conviertes los registros a la estructura adecuada.
+                var patients = result.Data as IEnumerable<Patients>;
+
+                if (patients != null)
+                {
+                    patientsResponse.Data = patients.Select(p => new GetPatients
+                    {
+                        PatientID = p.PatientID,
+                        DateOfBirth = p.DateOfBirth,
+                        Gender = p.Gender,
+                        PhoneNumber = p.PhoneNumber,
+                        Address = p.Address,
+                        EmergencyContactName = p.EmergencyContactName,
+                        EmergencyContactPhone = p.EmergencyContactPhone,
+                        BloodType = p.BloodType,
+                        Allergies = p.Allergies,
+                        CreatedAt = p.CreatedAt,
+                        IsActive = p.IsActive
+                    }).ToList();
+                }
+                else
+                {
+                    patientsResponse.Message = "No se encontraron pacientes válidos.";
+                    patientsResponse.Succes = false;
+                }
+
+                patientsResponse.Succes = true;
             }
             catch (Exception ex)
             {
@@ -55,7 +82,28 @@ namespace Clinicaapp.Application.Services
                     patientsResponse.Succes = result.Success;
                     return patientsResponse;
                 }
-                patientsResponse.Data = result.Data;
+
+                // Aquí conviertes el registro a la estructura adecuada.
+                var patient = result.Data;
+                patientsResponse.Data = new List<GetPatients>
+        {
+            new GetPatients
+            {
+                PatientID = patient.PatientID,
+                DateOfBirth = patient.DateOfBirth,
+                Gender = patient.Gender,
+                PhoneNumber = patient.PhoneNumber,
+                Address = patient.Address,
+                EmergencyContactName = patient.EmergencyContactName,
+                EmergencyContactPhone = patient.EmergencyContactPhone,
+                BloodType = patient.BloodType,
+                Allergies = patient.Allergies,
+                CreatedAt = patient.CreatedAt,
+                IsActive = patient.IsActive
+            }
+        };
+
+                patientsResponse.Succes = true;
             }
             catch (Exception ex)
             {

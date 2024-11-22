@@ -30,7 +30,28 @@ namespace Clinicaapp.Application.Services
                     medicalRecordResponse.Succes = result.Success;
                     return medicalRecordResponse;
                 }
-                medicalRecordResponse.Data = result.Data;
+                // Aquí conviertes los registros a la estructura adecuada.
+                var medicalRecords = result.Data as IEnumerable<MedicalRecord>;
+
+                if (medicalRecords != null)
+                {
+                    medicalRecordResponse.Data = medicalRecords.Select(mr => new GetMedicalRecords
+                    {
+                        RecordID = mr.RecordID,
+                        Diagnosis = mr.Diagnosis,
+                        Treatment = mr.Treatment,
+                        DateOfVisit = mr.DateOfVisit,
+                        CreatedAt = mr.CreatedAt,
+                        UpdatedAt = mr.UpdatedAt
+                    }).ToList();
+                }
+                else
+                {
+                    // Manejo de error si result.Data no es del tipo adecuado
+                    medicalRecordResponse.Message = "No se encontraron registros médicos válidos.";
+                    medicalRecordResponse.Succes = false;
+                }
+                medicalRecordResponse.Succes = true;
             }
             catch (Exception ex)
             {
@@ -40,6 +61,7 @@ namespace Clinicaapp.Application.Services
             }
             return medicalRecordResponse;
         }
+
 
         public async Task<MedicalRecordResponse> GetById(int id)
         {
@@ -53,7 +75,21 @@ namespace Clinicaapp.Application.Services
                     medicalRecordResponse.Succes = result.Success;
                     return medicalRecordResponse;
                 }
-                medicalRecordResponse.Data = result.Data;
+                // Aquí conviertes el registro a la estructura adecuada.
+                var record = result.Data;
+                medicalRecordResponse.Data = new List<GetMedicalRecords>
+                {
+                    new GetMedicalRecords
+                    {
+                        RecordID = record.RecordID,
+                        Diagnosis = record.Diagnosis,
+                        Treatment = record.Treatment,
+                        DateOfVisit = record.DateOfVisit,
+                        CreatedAt = record.CreatedAt,
+                        UpdatedAt = record.UpdatedAt
+                    }
+                };
+                medicalRecordResponse.Succes = true;
             }
             catch (Exception ex)
             {
