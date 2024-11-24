@@ -55,7 +55,7 @@ namespace Clinicaapp.Web.Controllers.AdmControllers
             return View();
         }
 
-        // POST: PatientAdmController/Create
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PatientSaveDto patientSaveDto)
@@ -78,7 +78,7 @@ namespace Clinicaapp.Web.Controllers.AdmControllers
             
         }
 
-        // GET: PatientAdmController/Edit/5
+        
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -99,7 +99,7 @@ namespace Clinicaapp.Web.Controllers.AdmControllers
             
         }
 
-        // POST: PatientAdmController/Edit/5
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, PatientUpdateDto patientUpdateDto)
@@ -122,7 +122,7 @@ namespace Clinicaapp.Web.Controllers.AdmControllers
             
         }
 
-        // GET: PatientAdmController/Delete/5
+
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -143,7 +143,7 @@ namespace Clinicaapp.Web.Controllers.AdmControllers
             
         }
 
-        // POST: PatientAdmController/Delete/5
+ 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, IFormCollection collection)
